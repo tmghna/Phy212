@@ -14,7 +14,7 @@ def abrupts(data: np.array, start: int = 1):
     return np.array(peaks), np.array(troughs)
 
 
-existing_file = 'frank-hertz.xlsx'
+existing_file = 'data/frank-hertz.xlsx'
 require_cols = [0,2]
 required_df = pd.read_excel(existing_file, usecols = require_cols)
 X = np.array([data for data in required_df['Voltage']])
@@ -39,39 +39,55 @@ fig, ax = plt.subplots(nrows=1, ncols=2)
 fig.set_figheight(5)
 fig.set_figwidth(10)
 
-plt.suptitle("Voltage vs Current")
+plt.suptitle("Frank-Hertz Experiment Plot")
 
-Troughs = np.array([])
+Troughs = []
 for i in range(len(peak_ranges)):
     _X, _Y = zip(*peak_ranges[i])
     coefficients = np.polyfit(_X, _Y, 4)
     p = np.poly1d(coefficients)
-    extended_X = np.linspace(_X[0], _X[-1], 100)
-    extended_Y = p(extended_X)
-    Troughs = np.append(Troughs, min(extended_Y))
-    ax[0].plot(extended_X, extended_Y, color = 'b', label=f'Trough Fit {i+1}')
 
-Peaks = np.array([])
+    extended_X = np.linspace(_X[0], _X[-1], 500)
+    extended_Y = p(extended_X)
+
+    idx = np.argmin(extended_Y)
+    trough_x = extended_X[idx]
+    Troughs.append(trough_x)
+
+    ax[0].plot(extended_X, extended_Y, color='b', label=f'Trough Fit {i+1}')
+
+Peaks = []
 for i in range(len(trough_ranges)):
     _X, _Y = zip(*trough_ranges[i])
     coefficients = np.polyfit(_X, _Y, 4)
     p = np.poly1d(coefficients)
-    extended_X = np.linspace(_X[0], _X[-1], 100)
+
+    extended_X = np.linspace(_X[0], _X[-1], 500)
     extended_Y = p(extended_X)
-    Peaks = np.append(Peaks, min(extended_Y))
-    ax[1].plot(extended_X, extended_Y, color = 'r', ls='--', label=f'Peak Fit {i+1}')
+
+    idx = np.argmax(extended_Y)
+    peak_x = extended_X[idx] 
+    Peaks.append(peak_x)
+
+    ax[1].plot(extended_X, extended_Y, color='b', label=f'Peak Fit {i+1}')
+
 
 ax[0].set_xlabel('Voltage(V)')
 ax[0].set_ylabel('Current(A)')
 ax[0].scatter(X, Y, label='Original Data', color='g')
 for trough in Troughs:
-    ax[0].axvline(trough, ls = '--')
+    ax[0].axvline(trough, ls = '--', color='k', alpha=0.7)
 ax[0].axvline()
 ax[0].legend()
+
 ax[1].set_xlabel('Voltage(V)')
 ax[1].set_ylabel('Current(A)')
 ax[1].scatter(X, Y, label='Original Data', color='g')
+for peak in Peaks:
+    ax[1].axvline(peak, ls = '--', color='k', alpha=0.7)
 ax[1].legend()
+
+print(f"Troughs: {Troughs}\n Peak: {Peaks}")
 
 plt.tight_layout()
 plt.show()
