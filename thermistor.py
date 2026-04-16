@@ -37,5 +37,11 @@ print(f"Predicted responses:\n{y_pred}")
 y_new_pred = model.predict(x)
 plt.plot(x, y_new_pred, color='b', label=f'best fit slope = {model.coef_}')
 
+# s=0
+# for i in range(len(X)):
+#     s+=(X[i]*model.coef_+model.intercept_ - Y[i])**2
+# print(s)
+# print(len(X))
+
 plt.legend()
 plt.show()
